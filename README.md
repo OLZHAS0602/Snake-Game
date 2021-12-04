@@ -1,2 +1,8 @@
 # Snake-Game
-Classic Snake game written in Java
+
+**Written in Java**
+
+Classic Snake game
+Download and Play!
+
+![](snake-game_gif.gif)
