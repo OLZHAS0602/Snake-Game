@@ -6,6 +6,8 @@ import java.util.Vector;
 
 public class GamePanel extends JPanel implements ActionListener {
 
+    GameFrame gameFrame;
+
     static final int SCREEN_SIZE = 600;
     static final int GRID_COUNT = 20;
     static final int CELL_SIZE = SCREEN_SIZE / GRID_COUNT;
@@ -25,12 +27,25 @@ public class GamePanel extends JPanel implements ActionListener {
     boolean moved;
 
     GamePanel () {
-        deltaTime = 170;
         random = new Random();
+
+        this.setPreferredSize(new Dimension(SCREEN_SIZE, SCREEN_SIZE));
+        this.setBackground(Color.gray);
+        this.setFocusable(true);
+        this.addKeyListener(new SnakeKeyAdapter());
+
+        timer = new Timer(deltaTime, this);
+        timer.start();
+
+        restartGame();
+    }
+
+    public void restartGame () {
+        deltaTime = 170;
 
         grid = new int[GRID_COUNT][GRID_COUNT];
         snakeHead = new Coord(GRID_COUNT / 2, GRID_COUNT / 2);
-        tail = new Vector<Coord>();
+        tail = new Vector<>();
         tail.add(new Coord(GRID_COUNT / 2 - 1, GRID_COUNT / 2));
         grid[GRID_COUNT / 2][GRID_COUNT / 2] = 1;
         grid[GRID_COUNT / 2][GRID_COUNT / 2 -1] = 1;
@@ -39,19 +54,14 @@ public class GamePanel extends JPanel implements ActionListener {
         applePos = new Coord();
         score = 0;
 
-        this.setPreferredSize(new Dimension(SCREEN_SIZE, SCREEN_SIZE));
-        this.setBackground(Color.gray);
-        this.setFocusable(true);
-        this.addKeyListener(new SnakeKeyAdapter());
-
         isGameOver = false;
+
         startGame();
     }
 
     public void startGame () {
         setApplePos();
-        timer = new Timer(deltaTime, this);
-        timer.start();
+        timer.setDelay(deltaTime);
     }
 
     public void setApplePos () {
@@ -97,8 +107,19 @@ public class GamePanel extends JPanel implements ActionListener {
             draw(g, 100);
             g.setColor(Color.yellow);
             g.setFont(new Font("Arial", Font.BOLD, 50));
-            FontMetrics metrics = getFontMetrics(g.getFont());
-            g.drawString("GAME OVER!", (SCREEN_SIZE / 2) - (metrics.stringWidth("GAME OVER!") / 2), SCREEN_SIZE / 2);
+            FontMetrics metricsGameOver = getFontMetrics(g.getFont());
+            g.drawString("GAME OVER!", (SCREEN_SIZE / 2) - (metricsGameOver.stringWidth("GAME OVER!") / 2), SCREEN_SIZE / 2);
+
+            g.setColor(new Color (100, 255, 100));
+            g.setFont(new Font("Arial", Font.BOLD, 25));
+            FontMetrics metricsRestart = getFontMetrics(g.getFont());
+            g.drawString("PRESS SPACE TO RESTART", (SCREEN_SIZE / 2) - (metricsRestart.stringWidth("PRESS SPACE TO RESTART") / 2), SCREEN_SIZE / 2 + metricsGameOver.getHeight());
+
+            g.setColor(new Color (255, 50, 50));
+            g.setFont(new Font("Arial", Font.BOLD, 25));
+            FontMetrics metricsClose = getFontMetrics(g.getFont());
+            g.drawString("PRESS ESCAPE TO EXIT", (SCREEN_SIZE / 2) - (metricsClose.stringWidth("PRESS ESCAPE TO EXIT") / 2), SCREEN_SIZE / 2 + metricsGameOver.getHeight() + metricsRestart.getHeight());
+
         }
     }
 
@@ -159,9 +180,16 @@ public class GamePanel extends JPanel implements ActionListener {
     public class SnakeKeyAdapter extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
-            if (moved) return;
+            if (!isGameOver && moved) return;
 
             switch (e.getKeyCode()) {
+                case KeyEvent.VK_ESCAPE:
+                    gameFrame.exit();
+                    break;
+                case KeyEvent.VK_SPACE:
+                    if (isGameOver) {
+                        restartGame();
+                    }
                 case KeyEvent.VK_W: case KeyEvent.VK_UP:
                     if (direction.y == 0) {
                         moved = true;
