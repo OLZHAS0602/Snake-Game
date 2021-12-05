@@ -2,7 +2,7 @@
 
 **Written in Java**
 
-Classic Snake game
-Download and Play!
+Classic Snake game  <br />
+Download and Play!  <br />
 
 ![](snake-game_gif.gif)
